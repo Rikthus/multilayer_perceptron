@@ -11,14 +11,14 @@ def load_dataset() -> pd.DataFrame:
     path = sys.argv[1]
     assert os.path.isfile(path), "invalid dataset path"
 
-    col_names = ["ID", "State"] + [f"ft{nb}" for nb in range(30)]
+    col_names = ["ID", "Diagnosis"] + [f"ft{nb}" for nb in range(30)]
     df = pd.read_csv(path, names=col_names)
     return df
 
 
 def display_pair_plot(df: pd.DataFrame):
     df.drop(columns=["ID"], inplace=True)
-    plot = sns.pairplot(df, hue="State")
+    plot = sns.pairplot(df, hue="Diagnosis")
     plot.figure.set_size_inches(24, 16)
     plt.show()
 
