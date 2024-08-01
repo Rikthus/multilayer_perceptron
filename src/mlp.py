@@ -2,16 +2,17 @@ import argparse
 import os
 import pandas as pd
 import sklearn.model_selection as skl_select
+from matplotlib import pyplot as plt
+from sklearn.metrics import accuracy_score
+
+from perceptron import Perceptron
 
 
 # 1 perceptron
 # multicouches
-# arguments couche epochs learning reate
 # graphs
 # algo optimize
-
 # select features
-# enlever 11 / 14 ?
 
 def load_dataset(path: str) -> pd.DataFrame:
     """Load a csv dataset, name columns, drop NaN and duplicate rows
@@ -25,6 +26,8 @@ def load_dataset(path: str) -> pd.DataFrame:
     df = pd.read_csv(path, names=col_names)
     df.dropna(inplace=True)
     df.drop_duplicates(inplace=True)
+    pd.set_option('future.no_silent_downcasting', True)
+    df.replace({"Diagnosis": {"M": 1, "B": 0}}, inplace=True)
     return df
 
 
@@ -43,20 +46,23 @@ def parse_arguments() -> list[any]:
     return args
 
 
-# def split_dataset(df: pd.DataFrame) -> tuple[dict[str, pd.DataFrame], dict[str, pd.DataFrame]]:
-#     pass
-
-
 def fit_model(x: pd.DataFrame, y: pd.DataFrame, lr: float, epochs: int):
-    print(lr)
-    print(epochs)
+    X = x.to_numpy()
+    Y = y.to_numpy().reshape(y.shape[0], 1).astype(float)
+    p = Perceptron(lr, len(x.columns))
+    for _ in range(epochs):
+        p.train_model(X, Y)
+    plt.plot(p.cost)
+    plt.show()
 
 
 def main():
     args = parse_arguments()
     df = load_dataset(args.dataset)
     
-    x_train, x_test, y_train, y_test = skl_select.train_test_split(df.drop(columns=["ID", "Diagnosis"]), df["Diagnosis"], test_size=0.2, random_state=42)
+    x_df = df.drop(columns=["ID", "Diagnosis"])
+    y_df = df["Diagnosis"]
+    x_train, x_test, y_train, y_test = skl_select.train_test_split(x_df, y_df, test_size=0.2, random_state=42)
     
     fit_model(x_train, y_train, args.lr, args.epochs)
 
