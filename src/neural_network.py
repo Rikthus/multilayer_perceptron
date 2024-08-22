@@ -11,19 +11,18 @@ class NeuralNetwork:
         layers_dimensions: list[int],
         nb_features: int,
     ) -> None:
-        self.__l_rate = learning_rate
         self.__epochs = epochs
-        self.__layers = self.__init_layers(layers_dimensions, nb_features)
+        self.__layers = self.__init_layers(layers_dimensions, nb_features, learning_rate)
 
     def __init_layers(
-        self, layers_dimensions: list[int], nb_features: int
+        self, layers_dimensions: list[int], nb_features: int, learning_rate: float
     ) -> list[Layer]:
         layers = []
         layers_dimensions.insert(0, nb_features)
         layers_dimensions.append(1)
 
         for i in range(1, len(layers_dimensions)):
-            layers.append(Layer(layers_dimensions[i], layers_dimensions[i - 1]))
+            layers.append(Layer(layers_dimensions[i], layers_dimensions[i - 1], learning_rate))
         return layers
 
     def __forward_pass(self, x_train: np.ndarray):
@@ -32,7 +31,17 @@ class NeuralNetwork:
             self.__layers[i].forward_pass(self.__layers[i - 1].activations)
 
     def __back_propagation(self, x_train: np.ndarray, y_train: np.ndarray):
-        pass
+        m = y_train.shape[1]
+        dZ = self.__layers[-1].activations - y_train
+        
+        for i in reversed(range(0, len(self.__layers))):
+            if i == 0:
+                prev_A = x_train
+            else:
+                prev_A = self.__layers[i - 1].activations
+            self.__layers[i].back_propagation(dZ, m, prev_A)
+            if i != 0:
+                dZ = self.__layers[i].weights.T.dot(dZ) * prev_A * (1 - prev_A)
 
     def fit_model(self, x_train: np.ndarray, y_train: np.ndarray):
         for _ in range(self.__epochs):
@@ -47,3 +56,8 @@ class NeuralNetwork:
         for layer in self.__layers:
             layer.print_shape()
             print(layer.activations)
+            
+    def print_weights(self):
+        for layer in self.__layers:
+            layer.print_shape()
+            print(layer.weights)

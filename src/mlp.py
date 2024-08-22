@@ -12,6 +12,31 @@ from sklearn.preprocessing import MinMaxScaler
 from neural_network import NeuralNetwork
 
 
+# multiple batch size strategies
+
+# implement softmax activation for output_layer
+
+# implement predict of x_test compared to y_test using the binary cross_entropy
+# error function
+
+# display train and test data set shapes
+# display each epochs: epochs, precision metrics
+# implement learning curves graphs after train
+
+# save network topologie and weights in a file
+
+
+# BONUSES
+
+# multiple weights init strategies
+# multiple activation functions
+# implement early stopping
+# add multiples metrics in learning phase
+
+# historic of metrics ?
+# a display of multiple learning curves on the same graph ?
+
+
 def load_dataset(path: str) -> pd.DataFrame:
     """Load a csv dataset, name columns, drop NaN and duplicate rows
 
@@ -62,7 +87,7 @@ def parse_arguments() -> list[any]:
     parser.add_argument(
         "--layers",
         type=validate_layers,
-        default=1,
+        default=[1, 1, 1],
         help='Layers dimensions in this format "<neurons in layer 1>, <neurons in layer 2>, etc...". For example to create 2 layers with respectively 20 and 5 neurons: "20, 5"',
     )
     parser.add_argument(
@@ -91,11 +116,13 @@ def main():
     x_train, x_test, y_train, y_test = skl_select.train_test_split(
         scaled_x_df, y_df, test_size=0.2, random_state=42
     )
+    y_train = y_train.to_numpy().reshape((y_train.shape[0], 1)).astype(float)
 
     network = NeuralNetwork(args.lr, args.epochs, args.layers, x_train.shape[1])
     network.fit_model(x_train.T, y_train.T)
     # network.print_shape()
     # network.print_activations()
+    network.print_weights()
 
 
 if __name__ == "__main__":
