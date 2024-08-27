@@ -11,9 +11,6 @@ from sklearn.preprocessing import MinMaxScaler
 # import numpy as np
 from neural_network import NeuralNetwork
 
-
-# multiple batch size strategies
-
 # implement softmax activation for output_layer
 
 # implement predict of x_test compared to y_test using the binary cross_entropy
@@ -88,13 +85,16 @@ def parse_arguments() -> list[any]:
         "--layers",
         type=validate_layers,
         default=[1, 1, 1],
-        help='Layers dimensions in this format "<neurons in layer 1>, <neurons in layer 2>, etc...". For example to create 2 layers with respectively 20 and 5 neurons: "20, 5"',
+        help='Layers dimensions in this format "<neurons in layer 1>, <neurons in layer 2>, etc...". For example to create 2 layers with respectively 20 and 5 neurons: "20, 5".',
     )
     parser.add_argument(
-        "--lr", type=float, default=0.1, help="Learning rate [0.00001 - 1.0]"
+        "--lr", type=float, default=0.1, help="Learning rate [0.00001 - 1.0]."
     )
     parser.add_argument(
-        "--epochs", type=int, default=1000, help="Number of iterations [1 - 10000]"
+        "--epochs", type=int, default=1000, help="Number of iterations [1 - 10000]."
+    )
+    parser.add_argument(
+        "--batch_size", type=int, default=0, help="Choose batch size for each gradient computing [1 - max_samples]."
     )
 
     args = parser.parse_args()
@@ -103,6 +103,12 @@ def parse_arguments() -> list[any]:
     args.epochs = min(1000, max(args.epochs, 1))
 
     return args
+
+def adapt_batch_size(arg_size: int, dataset_size: int) -> int: 
+   if arg_size == 0 or arg_size >= dataset_size:
+       return dataset_size
+   else:
+       return arg_size
 
 
 def main():
@@ -118,8 +124,9 @@ def main():
     )
     y_train = y_train.to_numpy().reshape((y_train.shape[0], 1)).astype(float)
 
-    network = NeuralNetwork(args.lr, args.epochs, args.layers, x_train.shape[1])
-    network.fit_model(x_train.T, y_train.T)
+    args.batch_size = adapt_batch_size(args.batch_size, len(x_train))
+    network = NeuralNetwork(args.lr, args.epochs, args.layers, x_train.shape[1], args.batch_size)
+    network.fit_model(x_train, y_train)
     # network.print_shape()
     # network.print_activations()
     network.print_weights()

@@ -10,19 +10,32 @@ class NeuralNetwork:
         epochs: int,
         layers_dimensions: list[int],
         nb_features: int,
+        batch_size: int,
     ) -> None:
         self.__epochs = epochs
+        self.__batch_size = batch_size
         self.__layers = self.__init_layers(layers_dimensions, nb_features, learning_rate)
 
     def __init_layers(
         self, layers_dimensions: list[int], nb_features: int, learning_rate: float
     ) -> list[Layer]:
-        layers = []
-        layers_dimensions.insert(0, nb_features)
-        layers_dimensions.append(1)
+        """Initialize layers 
 
-        for i in range(1, len(layers_dimensions)):
-            layers.append(Layer(layers_dimensions[i], layers_dimensions[i - 1], learning_rate))
+        Args:
+            layers_dimensions (list[int]): _description_
+            nb_features (int): _description_
+            learning_rate (float): _description_
+
+        Returns:
+            list[Layer]: _description_
+        """
+        layers = []
+
+        for i in range(len(layers_dimensions)):
+            if i == 0:
+               layers.append(Layer(layers_dimensions[i], nb_features, learning_rate))
+            else:
+                layers.append(Layer(layers_dimensions[i], layers_dimensions[i - 1], learning_rate))
         return layers
 
     def __forward_pass(self, x_train: np.ndarray):
@@ -44,9 +57,19 @@ class NeuralNetwork:
                 dZ = self.__layers[i].weights.T.dot(dZ) * prev_A * (1 - prev_A)
 
     def fit_model(self, x_train: np.ndarray, y_train: np.ndarray):
+        nb_samples = len(x_train)
         for _ in range(self.__epochs):
-            self.__forward_pass(x_train)
-            self.__back_propagation(x_train, y_train)
+            batch_start_idx = 0
+            while batch_start_idx < nb_samples:
+                if batch_start_idx + self.__batch_size > nb_samples:
+                    x_batch = x_train[batch_start_idx : nb_samples]
+                    y_batch = y_train[batch_start_idx : nb_samples]
+                else:
+                    x_batch = x_train[batch_start_idx : batch_start_idx + self.__batch_size]
+                    y_batch = y_train[batch_start_idx : batch_start_idx + self.__batch_size]
+                self.__forward_pass(x_batch.T)
+                self.__back_propagation(x_batch.T, y_batch.T)
+                batch_start_idx += self.__batch_size
 
     def print_shape(self):
         for layer in self.__layers:
