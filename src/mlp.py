@@ -60,12 +60,15 @@ def validate_layers(value):
 
         if len(int_list) > 100:
             raise ValueError("List should contain at most 100 values")
+        
+        if len(int_list) < 3:
+            raise ValueError("List should contain at least 3 values")
 
         if not all(0 < x < 100 for x in int_list):
             raise ValueError("All values should be positive and less than 100")
 
-        if not any(x > 0 for x in int_list):
-            raise ValueError("At least one value should be greater than zero")
+        if not all(x > 0 for x in int_list):
+            raise ValueError("All values should be greater than 0")
 
         return int_list
     except ValueError as e:
@@ -85,7 +88,7 @@ def parse_arguments() -> list[any]:
         "--layers",
         type=validate_layers,
         default=[1, 1, 1],
-        help='Layers dimensions in this format "<neurons in layer 1>, <neurons in layer 2>, etc...". For example to create 2 layers with respectively 20 and 5 neurons: "20, 5".',
+        help='Layers dimensions in this format "<neurons in layer 1>, <neurons in layer 2>, etc...". For example to create 3 layers with respectively 20 and 5 neurons: "20, 5".',
     )
     parser.add_argument(
         "--lr", type=float, default=0.1, help="Learning rate [0.00001 - 1.0]."
