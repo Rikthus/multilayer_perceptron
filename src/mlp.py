@@ -33,6 +33,8 @@ from neural_network import NeuralNetwork
 # historic of metrics ?
 # a display of multiple learning curves on the same graph ?
 
+# add thorough feature selection
+
 
 def load_dataset(path: str) -> pd.DataFrame:
     """Load a csv dataset, name columns, drop NaN and duplicate rows
@@ -130,9 +132,10 @@ def main():
     args.batch_size = adapt_batch_size(args.batch_size, len(x_train))
     network = NeuralNetwork(args.lr, args.epochs, args.layers, x_train.shape[1], args.batch_size)
     network.fit_model(x_train, y_train)
+    # print(network.predict(x_test.T))
     # network.print_shape()
-    # network.print_activations()
-    network.print_weights()
+    network.print_activations()
+    # network.print_weights()
 
 
 if __name__ == "__main__":

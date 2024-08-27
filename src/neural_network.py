@@ -2,6 +2,10 @@ import numpy as np
 
 from layer import Layer
 
+OUTPUT_NEURONS = 1
+
+from scipy.special import softmax
+np.set_printoptions(precision=5)
 
 class NeuralNetwork:
     def __init__(
@@ -30,13 +34,31 @@ class NeuralNetwork:
             list[Layer]: _description_
         """
         layers = []
+        layers_dimensions.insert(0, nb_features)
+        layers_dimensions.append(OUTPUT_NEURONS)
 
-        for i in range(len(layers_dimensions)):
-            if i == 0:
-               layers.append(Layer(layers_dimensions[i], nb_features, learning_rate))
+        for i in range(1, len(layers_dimensions)):
+            if i == len(layers_dimensions) - 1:
+                layers.append(Layer(layers_dimensions[i], layers_dimensions[i - 1], learning_rate, self.__softmax))
             else:
-                layers.append(Layer(layers_dimensions[i], layers_dimensions[i - 1], learning_rate))
+                layers.append(Layer(layers_dimensions[i], layers_dimensions[i - 1], learning_rate, self.__sigmoid))
         return layers
+    
+    def __sigmoid(self, Z: np.ndarray) -> np.ndarray:
+        act = 1 / (1 + np.exp(-Z))
+        return act
+    
+    def __softmax(self, Z: np.ndarray) -> np.ndarray:
+        # exp_z = np.exp(Z)
+        # sum_exp_z = np.sum(exp_z)
+        # act = exp_z / sum_exp_z
+        # act = softmax(Z, axis=1)
+        act = 1 / (1 + np.exp(-Z))
+        return act
+    
+    def predict(self, X: np.ndarray) -> np.ndarray:
+        self.__forward_pass(X)
+        return self.__layers[-1].activations >= 0.5
 
     def __forward_pass(self, x_train: np.ndarray):
         self.__layers[0].forward_pass(x_train)
@@ -70,6 +92,9 @@ class NeuralNetwork:
                 self.__forward_pass(x_batch.T)
                 self.__back_propagation(x_batch.T, y_batch.T)
                 batch_start_idx += self.__batch_size
+                
+    # def predict(self, x_test: np.ndarray) -> np.ndarray:
+        
 
     def print_shape(self):
         for layer in self.__layers:
