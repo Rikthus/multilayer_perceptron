@@ -128,13 +128,14 @@ def main():
         scaled_x_df, y_df, test_size=0.2, random_state=42
     )
     y_train = y_train.to_numpy().reshape((y_train.shape[0], 1)).astype(float)
+    y_test = y_test.to_numpy().reshape((y_test.shape[0], 1)).astype(float)
 
     args.batch_size = adapt_batch_size(args.batch_size, len(x_train))
     network = NeuralNetwork(args.lr, args.epochs, args.layers, x_train.shape[1], args.batch_size)
     network.fit_model(x_train, y_train)
-    # print(network.predict(x_test.T))
+    print(network.predict(x_train.T) == y_train.T)
     # network.print_shape()
-    network.print_activations()
+    # network.print_activations()
     # network.print_weights()
 
 

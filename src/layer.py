@@ -16,7 +16,7 @@ class Layer:
         self.__activations = self.__activation_function(Z)
         
     def back_propagation(self, dZ: np.ndarray, m: int, prev_activations: np.ndarray):
-        self.__dW = (1 / m) * dZ.dot(prev_activations.T)
+        self.__dW = (1 / m) * np.dot(dZ, prev_activations.T)
         self.__db = (1 / m) * np.sum(dZ, axis=1, keepdims=True)
         
     def update(self):

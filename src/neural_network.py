@@ -50,7 +50,7 @@ class NeuralNetwork:
     
     def __softmax(self, Z: np.ndarray) -> np.ndarray:
         # exp_z = np.exp(Z)
-        # sum_exp_z = np.sum(exp_z)
+        # sum_exp_z = np.sum(exp_z, axis=1, keepdims=True)
         # act = exp_z / sum_exp_z
         # act = softmax(Z, axis=1)
         act = 1 / (1 + np.exp(-Z))
@@ -75,8 +75,12 @@ class NeuralNetwork:
             else:
                 prev_A = self.__layers[i - 1].activations
             self.__layers[i].back_propagation(dZ, m, prev_A)
-            if i != 0:
+            if i > 0:
                 dZ = self.__layers[i].weights.T.dot(dZ) * prev_A * (1 - prev_A)
+    
+    def __update_gradients(self):
+        for layer in self.__layers:
+            layer.update()
 
     def fit_model(self, x_train: np.ndarray, y_train: np.ndarray):
         nb_samples = len(x_train)
@@ -91,6 +95,7 @@ class NeuralNetwork:
                     y_batch = y_train[batch_start_idx : batch_start_idx + self.__batch_size]
                 self.__forward_pass(x_batch.T)
                 self.__back_propagation(x_batch.T, y_batch.T)
+                self.__update_gradients()
                 batch_start_idx += self.__batch_size
                 
     # def predict(self, x_test: np.ndarray) -> np.ndarray:
