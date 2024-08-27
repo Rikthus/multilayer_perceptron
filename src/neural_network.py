@@ -1,8 +1,9 @@
 import numpy as np
+import json
 
 from layer import Layer
 
-OUTPUT_NEURONS = 1
+OUTPUT_NEURONS = 2
 
 from scipy.special import softmax
 np.set_printoptions(precision=5)
@@ -23,16 +24,6 @@ class NeuralNetwork:
     def __init_layers(
         self, layers_dimensions: list[int], nb_features: int, learning_rate: float
     ) -> list[Layer]:
-        """Initialize layers 
-
-        Args:
-            layers_dimensions (list[int]): _description_
-            nb_features (int): _description_
-            learning_rate (float): _description_
-
-        Returns:
-            list[Layer]: _description_
-        """
         layers = []
         layers_dimensions.insert(0, nb_features)
         layers_dimensions.append(OUTPUT_NEURONS)
@@ -52,14 +43,12 @@ class NeuralNetwork:
         # exp_z = np.exp(Z)
         # sum_exp_z = np.sum(exp_z, axis=1, keepdims=True)
         # act = exp_z / sum_exp_z
-        # act = softmax(Z, axis=1)
-        act = 1 / (1 + np.exp(-Z))
+        act = softmax(Z, axis=1)
+        # exp_x = np.exp(Z - np.max(Z, axis=1, keepdims=True))
+        # act = exp_x / np.sum(exp_x, axis=1, keepdims=True)
+        # act = 1 / (1 + np.exp(-Z))
         return act
     
-    def predict(self, X: np.ndarray) -> np.ndarray:
-        self.__forward_pass(X)
-        return self.__layers[-1].activations >= 0.5
-
     def __forward_pass(self, x_train: np.ndarray):
         self.__layers[0].forward_pass(x_train)
         for i in range(1, len(self.__layers)):
@@ -98,8 +87,13 @@ class NeuralNetwork:
                 self.__update_gradients()
                 batch_start_idx += self.__batch_size
                 
-    # def predict(self, x_test: np.ndarray) -> np.ndarray:
-        
+    def predict(self, X: np.ndarray) -> np.ndarray:
+        self.__forward_pass(X)
+        return self.__layers[-1].activations[1] >= self.__layers[-1].activations[0]
+    
+    def save_topologie(self):
+        topologie = {}
+        # topologie[layers] = 
 
     def print_shape(self):
         for layer in self.__layers:
